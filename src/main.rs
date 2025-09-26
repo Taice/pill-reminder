@@ -53,7 +53,7 @@ fn main() {
     let lines = file_contents.split('\n');
 
     let datetime_now: DateTime<Local> = DateTime::from(SystemTime::now());
-    let now = datetime_now.naive_utc();
+    let now = datetime_now.naive_local();
 
     for line in lines {
         if let Some(name) = check_line(line, now) {
@@ -79,7 +79,9 @@ pub fn check_line(line: &str, now: NaiveDateTime) -> Option<String> {
     let name = lhs.to_string();
 
     if let Ok(time) = NaiveTime::parse_from_str(rhs, "%H:%M") {
-        if check_pill_date(&name, now) && now.time() > time {
+        let time = time;
+
+        if check_pill_date(&name, now) && now.time() >= time {
             Some(name)
         } else {
             None
@@ -90,7 +92,7 @@ pub fn check_line(line: &str, now: NaiveDateTime) -> Option<String> {
 }
 
 pub fn check_pill_date(pill: &str, now: NaiveDateTime) -> bool {
-    let data_path = dirs::data_dir().unwrap();
+    let data_path = dirs::data_dir().unwrap().join("pill-reminder");
 
     let file = data_path.join(pill);
 
@@ -98,7 +100,7 @@ pub fn check_pill_date(pill: &str, now: NaiveDateTime) -> bool {
         let modified = a.metadata().unwrap().modified().unwrap();
 
         let localtime: chrono::DateTime<Local> = modified.into();
-        let datetime = localtime.naive_utc();
+        let datetime = localtime.naive_local();
 
         if now.date() <= datetime.date() {
             return false;
@@ -118,7 +120,8 @@ pub fn line_split(line: &str) -> Option<(&str, &str)> {
 }
 
 pub fn update_pill(pill: &str) {
-    let data = dirs::data_dir().unwrap();
+    let data = dirs::data_dir().unwrap().join("pill-reminder");
+    fs::create_dir_all(&data).unwrap();
     let filename = data.join(pill);
 
     touch(&filename);
