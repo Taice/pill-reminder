@@ -102,7 +102,6 @@ pub fn check_pill_date(pill: &str, now: NaiveDateTime) -> bool {
         let localtime: chrono::DateTime<Local> = modified.into();
         let datetime = localtime.naive_local();
 
-        println!("{}, {}", now.date(), datetime.date());
         if now.date() <= datetime.date() {
             return false;
         }
