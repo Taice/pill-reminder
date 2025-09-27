@@ -102,6 +102,7 @@ pub fn check_pill_date(pill: &str, now: NaiveDateTime) -> bool {
         let localtime: chrono::DateTime<Local> = modified.into();
         let datetime = localtime.naive_local();
 
+        println!("{}, {}", now.date(), datetime.date());
         if now.date() <= datetime.date() {
             return false;
         }
@@ -128,9 +129,12 @@ pub fn update_pill(pill: &str) {
 }
 
 fn touch(path: &PathBuf) {
+    fs::remove_file(path).unwrap();
     OpenOptions::new()
         .create(true)
         .write(true)
         .open(path)
+        .unwrap()
+        .write(b"")
         .unwrap();
 }
